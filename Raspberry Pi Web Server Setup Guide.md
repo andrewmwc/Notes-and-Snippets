@@ -216,6 +216,3 @@ Visit: [https://192.168.1.174/node](https://192.168.1.174/node)
 | Proxy (opt) | ✅      | [https://192.168.1.174/node](https://192.168.1.174/node)         |
 
 ---
-
-Need to add MySQL, dynamic DNS, or deploy a full app? Let me know!
-
