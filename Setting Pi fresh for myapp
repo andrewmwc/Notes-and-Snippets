@@ -1,0 +1,176 @@
+# `README.md` – Raspberry Pi Web Server Setup for `<myapp>`
+
+> ⚙️ **Author:** `ac`  
+> 🕓 **Environment:** Raspberry Pi OS  
+> 🛠️ **Stack:** Apache2 + PHP 8.2 + Node.js 20 + PM2  
+> 🔐 **TLS:** Self-signed HTTPS
+
+---
+
+## 📦 System Prep
+
+```bash
+sudo apt update && sudo apt full-upgrade -y
+sudo reboot
+```
+
+---
+
+## 🌐 Apache & PHP Installation
+
+```bash
+sudo apt install apache2 -y
+sudo apt install php libapache2-mod-php -y
+php -v
+```
+
+Test PHP:
+```bash
+echo "<?php phpinfo(); ?>" | sudo tee /var/www/html/info.php
+```
+
+---
+
+## 🔒 Enable SSL with Self-Signed Cert
+
+```bash
+sudo a2enmod ssl
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout /etc/ssl/private/selfsigned.key \
+  -out /etc/ssl/certs/selfsigned.crt
+```
+
+Modify config:
+```bash
+sudo nano /etc/apache2/sites-available/default-ssl.conf
+sudo a2ensite default-ssl
+sudo systemctl reload apache2
+```
+
+---
+
+## 📦 Install PHP 8.2 + GD for QR Code Generation
+
+```bash
+sudo apt install php8.2-gd libapache2-mod-php8.2
+sudo a2enmod php8.2
+sudo systemctl restart apache2
+php -m | grep gd
+```
+
+---
+
+## ⚙️ Enable Required Apache Modules
+
+```bash
+sudo a2enmod proxy proxy_http rewrite headers
+sudo systemctl restart apache2
+```
+
+Update `.htaccess` in `/var/www/html/api/` to support routing.
+
+---
+
+## 🟩 Node.js + PM2 Setup (For Frontend or APIs)
+
+```bash
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+node -v
+npm -v
+
+sudo npm install -g pm2
+cd ~/nodeapp
+pm2 start server.js
+pm2 startup
+pm2 save
+```
+
+---
+
+## 📁 Directory Structure for `<myapp>`
+
+```
+/var/www/html/
+├── api/               # PHP backend
+├── controllers/       # PHP controllers
+├── models/            # PHP models
+├── public/            # HTML + JS frontend
+├── qrcodes/           # QR image output
+├── data/              # CSV datasets
+```
+
+---
+
+## 🔧 Permissions Setup
+
+```bash
+sudo chown -R www-data:www-data /var/www/html
+sudo chmod -R 775 /var/www/html/data
+sudo chmod -R 775 /var/www/html/qrcodes
+sudo chmod -R 775 /var/www/html/controllers
+sudo chmod -R 775 /var/www/html/models
+sudo chmod -R 775 /var/www/html/public
+```
+
+(Optional: Use `ac:www-data` for developer+webgroup dual access)
+
+---
+
+## 🔐 Secure Data Directory
+
+```bash
+sudo chmod 700 /var/www/html/data
+sudo chmod 700 /var/www/html/data/*
+echo "deny from all" | sudo tee /var/www/html/data/.htaccess
+```
+
+---
+
+## 🧪 API Routing Test
+
+Check from browser or `curl`:
+```
+https://<pi-ip>/api/events.php
+```
+
+Apache conf validation:
+```bash
+sudo apachectl configtest
+```
+
+---
+
+## 🧹 Maintenance Commands
+
+```bash
+sudo systemctl restart apache2
+sudo systemctl reload apache2
+sudo tail -f /var/log/apache2/error.log
+```
+
+---
+
+## 🧯 Backup Script Example
+
+```bash
+#!/bin/bash
+DATE=$(date +%Y%m%d_%H%M)
+sudo zip -r /home/ac/html_backup_$DATE.zip /var/www/html
+```
+
+Make executable:
+
+```bash
+chmod +x backup.sh
+sudo bash backup.sh
+```
+
+---
+
+## 📂 Archive Known Good Configs
+
+```bash
+sudo zip -r html_Goodv1.zip /var/www/html
+```
+
