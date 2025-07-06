@@ -44,6 +44,13 @@ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 Modify config:
 ```bash
 sudo nano /etc/apache2/sites-available/default-ssl.conf
+
+Ensure : 
+SSLEngine on
+SSLCertificateFile /etc/ssl/certs/apache-selfsigned.crt
+SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
+
+
 sudo a2ensite default-ssl
 sudo systemctl reload apache2
 ```
