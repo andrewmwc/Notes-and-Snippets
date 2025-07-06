@@ -14,6 +14,7 @@ sudo apt update && sudo apt full-upgrade -y
 sudo reboot
 ```
 
+
 ---
 
 ## 🌐 Apache & PHP Installation
@@ -28,7 +29,7 @@ Test PHP:
 ```bash
 echo "<?php phpinfo(); ?>" | sudo tee /var/www/html/info.php
 ```
-
+open webbrowser http://<server ip>/info.php
 ---
 
 ## 🔒 Enable SSL with Self-Signed Cert
